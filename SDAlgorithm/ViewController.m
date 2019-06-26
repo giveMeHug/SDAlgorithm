@@ -14,6 +14,32 @@ typedef NS_ENUM(NSUInteger, SDSortMode) {
     SDSortModeMergesort,// 合并排序
 };
 
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+typedef struct Node Node;
+
+struct Tree {
+    int data;
+    struct Tree *left;
+    struct Tree *right;
+};
+
+typedef struct Tree Tree;
+
+
+@interface SDTree : NSObject
+@property (nonatomic, assign) int data;
+@property (nonatomic, strong) SDTree *rightTree;
+@property (nonatomic, strong) SDTree *leftTree;
+@end
+
+@implementation SDTree
+
+@end
+
 @interface ViewController ()
 
 @end
@@ -223,6 +249,153 @@ typedef NS_ENUM(NSUInteger, SDSortMode) {
             array[currentIndex +i] = auxiliaryArray[leftIndex +i ];
         }
     }
+}
+
+// 反转单链表
+- (void)reveseLink:(Node *)node {
+    Node *currentNode, *preNode;
+    currentNode = node->next;
+    Node *last = NULL;
+    if (currentNode) {
+        preNode = currentNode->next;
+        currentNode->next = last;
+        last = currentNode;
+        currentNode = preNode;
+    }
+    node->next = currentNode;
+}
+
+// 层序遍历二叉树
+- (void)levelEnumTree:(SDTree *)tree {
+    if (!tree) return;
+    NSMutableArray<SDTree *> *mTrees = @[].mutableCopy;
+    [mTrees addObject:tree];
+    while (mTrees.count != 0) {
+        SDTree *tree = mTrees.firstObject;
+        NSLog(@"%d", tree.data);
+        if (tree.leftTree) {
+            [mTrees addObject:tree.leftTree];
+        }
+        if (tree.rightTree) {
+            [mTrees addObject:tree.rightTree];
+        }
+        [mTrees removeObject:tree];
+    }
+}
+// 二分法在一个有序数组中查找某个值
+- (BOOL)searchTargetNum:(NSNumber *)number numberArray:(NSArray<NSNumber *> *)array {
+    NSInteger min = 0;
+    NSInteger max = array.count - 1;
+    NSInteger mid = 0;
+    while (mid < max) {
+        mid = (min + max) / 2;
+        if (number.integerValue == array[mid].integerValue) {
+            return YES;
+        } else if(number.integerValue > array[mid].integerValue) {
+            min = mid + 1;
+        } else if (number.integerValue < array[mid].integerValue) {
+            max = mid - 1;
+        }
+    }
+    return NO;
+}
+// 单链表插入某个结点
+- (void)insertInLink:(Node *)link num:(int)num node:(Node *)node {
+    // 如果是空链表 直接插入到头结点
+    if (link == NULL) {
+        link->next = node;
+    }
+    // 找到要插入位置的前一个结点
+    int i = 0;
+    Node *currentNode = link->next;
+    while (i < num - 1) {
+        i++;
+        currentNode = currentNode->next;
+    }
+    node->next = currentNode->next;
+    currentNode->next = node;
+}
+
+// 在单链表末尾插入一个值为value的结点
+- (void)insertInLink:(Node *)link value:(int)value {
+    Node insertNode = {value , NULL};
+    Node *currentNode = link->next;
+    if (link == NULL) {
+        *link = insertNode;
+    } else {
+        while (currentNode->next != NULL) {
+            currentNode = currentNode->next;
+        }
+        currentNode->next = &insertNode;
+    }
+}
+// 反转二叉树
+// 思路：反转左子树，反转右子树
+- (Tree *)reverseTree:(Tree *)tree {
+    if (tree == NULL) {
+        return tree;
+    }
+    Tree *temp = tree->left;
+    tree->left = tree->right;
+    tree->right = temp;
+    [self reverseTree:tree->left];
+    [self reverseTree:tree->right];
+    return tree;
+}
+// 判断二叉树是否是镜像
+- (BOOL)isMriorTree:(Tree *)tree {
+    return [self isMriorTree:tree->left right:tree->right];
+}
+
+- (BOOL)isMriorTree:(Tree *)left right:(Tree *)right {
+    if (left == NULL && right == NULL) {
+        return YES;
+    }
+    if (left == NULL || right == NULL) {
+        return NO;
+    }
+    return [self isMriorTree:left->left right:right->right] && [self isMriorTree:left->right right:right->left];
+}
+// 给定二叉树输出二叉树的镜像
+- (Tree *)mriorTree:(Tree *)tree {
+    if (tree == NULL || (tree->left == NULL && tree->right == NULL)) {
+        return tree;
+    }
+    Tree *tempTree = tree->left;
+    tree->left = tree->right;
+    tree->right = tempTree;
+    if (tree->left != NULL) {
+        [self mriorTree:tree->left];
+    }
+    if (tree->right != NULL) {
+        [self mriorTree:tree->right];
+    }
+    return tree;
+}
+
+// 不适用中间变量交换两个值的值
+- (void)swap:(int)a b:(int)b {
+    // 相加
+    /*
+    a = a + b;
+    b = a - b;
+    a = a - b;
+    */
+    // 异或
+    a = a ^ b;
+    b = a ^ b;
+    a = a ^ b;
+}
+
+// 两个数的最大公约数
+- (int)maxCommonDivisor:(int)a b:(int)b {
+    int temp = 0;
+    while (a % b > 0) {
+        temp = a % b;
+        a = b;
+        b = temp;
+    }
+    return b;
 }
 
 @end
